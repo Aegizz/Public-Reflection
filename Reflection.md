@@ -15,20 +15,20 @@ Our practical group had originally seen this protocol but decided against follow
 3. Reflection of Feedback, Self critique and biases/consequences, and the Cyber Skill Shortage
 
 ## Reflection on Standarised Protocol
-The Olaf-Neighbourhood protocol is fairly well documentated and fleshed out now, as we head towards the end of the semester. This was not the case around 5 weeks ago when the voting of each protocol was organised. There has been around 35 commits to the original protocol since the beginning of the assignment that had fixed our problems with it. In the meant time, our practical/tutorial group had mutually agreed to use a modified version with a fork of their documentation.
+The Olaf-Neighbourhood protocol is fairly well documentated and fleshed out now, as we head towards the end of the semester. This was not the case around 5 weeks ago when the voting of each protocol was organised. There has been around 35 commits to the original protocol since the beginning of the assignment that had fixed our problems with it. In the mean time, our practical/tutorial group had mutually agreed to use a modified version with a fork of their documentation.
 
 Our implementation of the protocol differed in two key aspects.
 
-    A. Time to die
+    A. Time to die in private chats
     B. Client and Server ID's
 
-The reason the we had made these changes were because of a couple issues in the early design of the protocol. 
+We made these changes due to a few issues that were present in the earlier iterations of the protocol. 
 
-Firstly, there is no time to die in the final implementation, this can cause potential issues as older packets maybe prioritised over newer ones. This is a small nitpick and will only cause issues in cases where the packets are sent out of order. This is highly unlikely since websocket uses TCP not UDP.
+Firstly, there is no time to die in the final implementation, this can cause potential issues as older packets may be prioritised over newer ones. This is a small nitpick and will only cause issues in cases where the packets are sent out of order. This is highly unlikely since websocket uses TCP not UDP.
 
 Secondly, originally the fingerprinting and signing implementation was not outlined, so as a group we determined that adding client and server id's as a backup would be useful.
 
-### Issues with the Original Olaf- Neighbourhood Protocol
+### Issues with the Original Olaf-Neighbourhood Protocol
 
 Key issues with the protocol:
 
@@ -38,23 +38,19 @@ Key issues with the protocol:
 4. Handling Portflooding
 5. Server to Server Signing and Verification
 
-The standarised encryption was well documentated, the issue was with the implemenation. Since RSA and AES has a wide range of standards and models, accurately implementing these methods between a wide range of coding languages, libraries, and versions of libraries proved problematic. A good example of this is when we updated our signing method to match the new spec after it was updated. One of our group members was operating on OpenSSL v1.1.2 whereas the others were on OpenSSL v3.0.2. Thus when the group member updated the specification to match the OpenSSL v1.1.2 implementation, our systems would fail to sign the keys without a relevant warning.
+The standarised encryption was well documentated, the issue lay with the implemenation. Since RSA and AES has a wide range of standards and models, accurately implementing these methods between a wide range of coding languages, libraries, and versions of libraries proved problematic. A good example of this is when we updated our signing method to match the new spec after it was updated. One of our group members was operating on OpenSSL v1.1.2 whereas the others were on OpenSSL v3.0.2. Thus when the group member updated the specification to match the OpenSSL v1.1.2 implementation, our systems would fail to sign the keys without a relevant warning.
 
-JSON is a popular format for organising data and ensuring the format between each system remains the same. This is awesome for communicating data easily between different coding languages and systems. The problem arrives when we used hashing functions to sign these JSON messages. Slight variations in the implementations of the format of the JSON strings caused issues in verifing the signature of a message. An example of this is when the "json" python library function dump() is called, there is a whitespace at the begining of the resulting string, causing the hash of the string to be different and thus the signature verification failing. For future maybe only the message in the data field should be used for hashing to prevent this issue. The other solution we recommended was the removal of whitespace for hashing. This is a possible solution, but we were unsure about the effectivness as there is a distinct lack of communication between groups. 
+JSON is a popular format for organising data and ensuring the format between each system remains the same. This is beneficial for communicating data between different coding languages and systems. Issues occurred when hashing functions were used to sign these JSON messages, as slight variations in the implementations the JSON strings caused inconsistent hashes for what were essentially identical JSON packets. An example of this is when the "json" python library function dump() is called, there is a whitespace at the begining of the resulting string, causing the hash of the string to be different and thus the signature verification to fail for those not using the python "json" library. We recommended removing whitespace for hashing, but were unsure about the effectivness as there is a distinct lack of communication between groups. 
 
-Due to the nature of using websockets there is always the possibility of multithreading and portflooding causing issues. If multiple servers are running on a client there's a possibility of flooding the server with connections and causing a DoS attack. The other issue is relating to multithreading. Websocket is not designed for fast communication with a large number of clients, this problem is exacerbated by the use of slower programming languages like Python with its global interpreter lock. This will obvisiouly lead to similar DoS attacks if not handled correctly by the implementator (Less of a design flaw but is worth noting that it should be included in the documentation).
+Due to the nature of using websockets there is always the possibility of multithreading and portflooding causing issues. If multiple servers are running on a client there's a possibility of flooding the server with connections and causing a DoS attack. The other issue is relating to multithreading. Websocket is not designed for fast communication with a large number of clients; this problem is exacerbated by the use of slower programming languages like Python with its global interpreter lock. This will lead to similar DoS attacks if not handled correctly by the implementor (Less of a design flaw but is worth noting that it should be included in the documentation).
 
-Server to server signing and verification is the basis of our interserver communication is verified. If a user is able to set up their own server and client there is the possibility of a MITM attack where a malicious actor creates a server and client setup that is used for communication and simply replays the message to each client as if they are communicating to each other.
+Server to server signing and verification is a vital component of interserver communication. If a user is able to set up their own server and client, there is the possibility of a MITM attack where a malicious actor creates a server and client setup that is used for communication and simply replays the message to each client as if they are communicating to each other.
 
-Here is a diagram of an example where a malicious server could advertise to be a different user while storing the data and replay it to the actual user.
-
-In this situation Client A and Client B want to connect and share secret information. The Malicious Server advertises Client C to Client A and Client D to Client B. If both clients connect to the malicious clients, the MITM can store the data will replaying it to each server without them knowing. This requires a little bit of social engineering to have the clients connect correctly or another vulnerability in the implementation but note it is still possible.
-
-See Appendix 3: MITM Attack Diagram
+See Appendix 3: MITM Attack Diagram for a diagram of an example where a malicious server could advertise to be a different user while storing the data and replay it to the actual user.
 
 ### Individual Contributions
 
-Aegizz - (Me) Lloyd Draysey
+Aegizz - Lloyd Draysey
 
 gradyclark03 - Graydon Clark
 
@@ -62,21 +58,36 @@ GohnJrey - Christopher Evans
 
 Goundsu - Sunjay Gounder
 
-To conclude, what Lloyd did in the project:
+**Lloyd's Contributions:**
 
 - Makefile
 - BOF.py (Original buffer overflow PoC and vulnerability)
 - tests/* (All test files, including expected output and processing)
-- .github/workflows/testing.yml (Generating test workflow for github to automatically run all tests automatically)
-- client/* except, client_key_gen.cpp and client_key_gen.h. (All client communication setup including message parsing, message generation, message api and documentation, signing,fingerprinting, aes, base64, etc., Christopher Evans did implement the RSA in this folder (with the support of ChatGPT))
+- .github/workflows/testing.yml (Generating test workflow for github to run all tests automatically)
+- client/* except, client_key_gen.cpp and client_key_gen.h. (All client communication setup including message parsing, message generation, message api and documentation, signing,fingerprinting, aes, base64, etc., Christopher Evans did implement the RSA in this folder (with the support of ChatGPT)
 - test.sh (Test bash script to be called by github workflow)
 - Initially setting up testClient and server using websocketpp documentation.
 - Install nlohmann/json and setting up for documentation.
+ 
+**Graydon's Contributions:**
+
+- Server-server communication
+    - Managing spawned clients that connect to other servers on behalf of server (with the help of ChatGPT)  
+    - Server hellos, client updates, forwarding chats, signature verification
+- Server and client handling of messages implementation
+- Management of all connections made to or by a server
+- Mapping clients and servers to public keys
+- Much of server_list.h + server_list.cpp and server_utilities.h and server_utilities.cpp
+- Much of userClient functionality + ID logic
+    - Enhancements to client_list for userClient
+- Updating RSA keys to spec (with the help of ChatGPT)
+- test_data_message.cpp and test_chat_message.cpp
+- ServerDocumentation.md
 
 
 ## Reflection of Implementation, Security, Flaws and Decisions
 
-When creating and desinging a project there are always choices to be made, deciding between a method or choice of implementaion impacts the quality, security and operability of a code base. The key decisions we will outline are:
+When creating and desinging a project there are always choices to be made, deciding between a method or choice of implementation impacts the quality, security and operability of a code base. The key decisions we will outline are:
 
 1. Coding Language
 2. Libraries
@@ -87,74 +98,88 @@ When creating and desinging a project there are always choices to be made, decid
 
 ### Coding Language
 
-Since the design for this assignment was to learn about unsafe coding practises and vulnerabilities in code, a low-level, non-memory safe language is always optimal for designing an insecure implementation. This limits our languages, to Assembly, C, C++, C/C++ Header, Cython, D (ASD, 2024). In my opinion, C++ is the best choice here as we can use the plethora of libraries to support and minimise the need for developing JSON and Websocket packages. It also is well documentated to help with integrating with other systems such as testing and frontend, with compatibility for a wide range of systems. C++ also has the capabilities of using C library functions, many of which are insecure making it great for developing insecure code.
+Since the design for this assignment was to learn about unsafe coding practices and vulnerabilities in code, a low-level, non-memory safe language is always optimal for designing an insecure implementation. This limits our languages, to Assembly, C, C++, C/C++ Header, Cython, D (ASD, 2024). In our opinion, C++ is the best choice here as we can use the plethora of libraries to support and minimise the need for developing JSON and Websocket packages. It is also well documented to simplify integration with other systems, and is compatible for a wide range of systems. C++ also has the capabilities of using C library functions, many of which are insecure, making it simple to develop insecure code. Finally, it is a language we as a group are familiar with and have experience programming in.
 
 ### Libraries
 
-For our implementation there will be three libraries we as a group decided to use. These libraries help us develop three key areas very quickly, encryption, websockets and JSON parsing.
+For our implementation, OpenSSL, websocketpp and nlohmann/json were chosen to be used as these libraries provided us with three core components of our chat system, encryption, websockets and JSON parsing.
 
-1. OpenSSL
-2. websocketpp
-3. nlohmann/json
+**1. OpenSSL**
 
 OpenSSL is a popular software library for secure connections over a network. We used OpenSSL for AES and RSA encryption per the standard.
 
-See Appendix 1 & 2.
+See **Appendix 1 & 2** for encryption standards for the protocol.
 
-These were quite difficult to implement in OpenSSL for C++ as there was a lack of documentation to implement to the standard of the Olaf Neighbourhood Protocol (ON). This meant most of the encryption, encoding and hashing was generated by artificial intelligence like ChatGPT. In the long run, this made understanding the functionality and debugging mistakes in the implementation difficult. Encryption was the hardest part of the project to get right, as it is depended on for interoperability between other clients.
+These encryption methods were challenging for us to implement as there was a lack of documentation for OpenSSL to be able to meet the standard of the Olaf Neighbourhood Protocol (ON). This meant most of the encryption, encoding and hashing was generated by artificial intelligence like ChatGPT. In hindsight, this lessened our understanding of the functionality and subsequently caused a more difficult and time consuming debugging process. If this project were to be done again, more time would be spent trying to understand the documentation to gain a better understanding of the library. Encryption was the toughest aspect of the project, as consistency is vital across implementations for interoperability between other clients.
 
-Websocketpp is a C++ library that implements RFC6455 Websocket Protocol, allowing us to integrate the protocol into our C++ programs. This library enabled us to iniate connections to servers and clients.
+**2. websocketpp**
 
-nlohmann/json is a C++ library designed for reading json, creating json objects, serialization and deserialization in a modern C++ syntax. This library allowed us to parse and dump JSON objects and strings easily with very little to no errors. Simply a method of abstracting the tools required to read the protocol syntax.
+Websocketpp is a C++ library that implements RFC6455 Websocket Protocol, allowing us to integrate the protocol into our C++ programs. This library enabled us to initiate connections from clients to servers. Examples existed to help us start the project, however, the documentation was quite overwhelming. This led to a reliance on AI generated code to learn the library, however, we eventually became familiar enough with the library to not need ChatGPT. Though it was never mentioned in the public protocol page, (was not sure if it infringed on academic integrity rules) server-server communication was only possible through servers spawning their own clients to make connections to other servers. This was a major hurdle to overcome that was likely brought upon by our choice of programming language.
+
+**3. nlohmann/json**
+
+nlohmann/json is a C++ library designed for reading json, creating json objects, serialization and deserialization using modern C++ syntax. This library allowed us to parse and dump JSON objects and strings easily with very little to no errors. This library was simply a method of abstracting the tools required to read the protocol syntax.
 
 ### DevOps, Testing, CI/CD, and Running the Code
 
-To install and run our code we have a fully documentated README.md on installing the dependancies and building and then making our test cases and running our clients and servers.
+To install and run our code we have a fully documentated README.md on installing the dependencies and building and then making our test cases and running our clients and servers.
 
-See Appendix 4. (We would highly recommend just checking it out from our Github [https://github.com/Aegizz/Tut-7-ON-Imp/blob/main/README.md](https://github.com/Aegizz/Tut-7-ON-Imp/blob/main/README.md))
+See **Appendix 4**. (We would highly recommend just checking it out from our Github [https://github.com/Aegizz/Tut-7-ON-Imp/blob/main/README.md](https://github.com/Aegizz/Tut-7-ON-Imp/blob/main/README.md))
 
-From the very start of our implementation we have employed testing via Github Actions and unit test functions for each class and function we created. These all can be found in the tests/ directiory in our repository. To view our testing history checkout our Github actions and pull requests. These actions essentially installed our dependancies, built our client and server, built our tests and ran them, then tested a real client-server communication via a bash script, test.sh.
+From the initial stages of our development, we have employed testing via GitHub Actions and unit test functions for classes and functions we created. These all can be found in the tests/ directory in our repository. To view our testing history checkout our Github actions and pull requests. These actions essentially installed our dependencies, built our client and server, built our tests and ran them, then tested a real client-server communication via a bash script, test.sh.
 
-See Appendix 5.
+See **Appendix 5** for Testing Workflow.
 
-This testing methodology enabled us to prevent broken code from appearing on the main branch of the project and ensured that each user was closely following the specification.
+This testing methodology enabled us to prevent code that did not work from appearing on the main branch of the project and ensured that each user was closely following the specification.
 
 ### Bugs and Operability between Groups
 
-Since the premise of this project is to build a messaging app that integrates with other members of the class, interoperability is a big focus of the project. To achieve interoperability we spent time testing with other groups to ensure the sucesss of our project. Below are the logs of testing with another group within our class.
+Since a major focus of this project is to build a messaging app that integrates with other implementations in the cohort, interoperability is a big focus of the project. To achieve interoperability we spent time testing with other groups to ensure the sucesss of our project. 
 
-See Appendix 6.
+See **Appendix 6** for logs of testing with another group.
 
-This group had failed to implement signing and encryption yet, so this caused issues when deploying our clients, but the server to server communication was working sucessfully. An issue we did run into that was fixed fairly quickly, was the use of JSON strings and JSON arrays for the data. In the original specification the data JSON object was changed to and from JSON strings and arrays depending on reception about the change. Luckily, we were able to quickly switch our implementation over in a couple of seconds to ensure compataibility.
+This group failed to implement signing and encryption yet, so this caused issues when deploying our clients, but server to server communication worked sucessfully. An issue we encountered was the use of JSON strings and JSON arrays for the data. In the original specification, the data JSON object was changed to and from JSON strings and arrays depending on reception about the change. Luckily, we were able to quickly modify our implementation to ensure compataibility.
 
-We had met with another group earlier in the development process to test, but the group could not launch their server after around 3-4 hours of waiting. We think a dedicated opportunity for students to test interoperability would have been great for practicals but since development was so close to the end of the semester we lacked the time and opportunity due to workload.
+We had met with another group earlier in the development process to test, but the group could not launch their server after around 3-4 hours of waiting. A dedicated opportunity for students to test interoperability would have been beneficial, but since development began so close to the deadline we lacked the time and opportunity due to workload.
 
 ### Backdoors and Vulnerabilities
 
-There are five different vulnerabilities and one backdoor in this code. Vulnerability #1 is the most important of these as it allows us to achieve shell via a buffer overflow on any machine. Buffer overflows, are one of the most common types of RCE vulnerabilities and thought it would be a grea opportunity to add one. Currently there is a POC python exploit in the code.
-
-See Appendix 7.
-
-This exploit will only work unless the memory locations are correct and they will vary from system to system, so to get this wokring on your system you may need to do some testing. The other cool part of this vulnerability is that it functions as a DoS attack due to the server crashing from stack smashing. We only disabled the functionality of this when using the server-debug as we did not want to accidentally cause someone's computer to be backdoored when sharing the code to class mates.
+We noted five different vulnerabilities and one backdoor in this code. 
 
 
   #### Vulnerability #1
-  In server.cpp, there is an insecure string copy which can cause a stack overflow, luckily it is protected by the compiler.... except that the developer disable stack protection and memory protection for debugging!!! Oh no!
+  In server.cpp, there is an insecure string copy which can cause a stack overflow, luckily it is protected by the compiler.... except that the developer disabled stack protection and memory protection for debugging!!! Oh no!
+      
       Insecure Copy /server.cpp Line 115
       server-debug Makefile Line 40
+     
+Vulnerability #1 is the most important of these as it allows us to achieve shell via a buffer overflow on any machine. Buffer overflows, are one of the most common types of RCE vulnerabilities and using C++ allowed us to implement this with relative ease. Currently there is a PoC python exploit in the repository.
+
+See **Appendix 7** for PoC python exploit code.
+
+This exploit will only work unless the memory locations are correct and they will vary from system to system, so to get this working on another system, it may require testing. This vulnerability also doubles as a DoS attack due to the server crashing from stack smashing. We only enabled the functionality of this when using the server-debug as we did not want to accidentally cause someone's computer to be backdoored when sharing the code to class mates. 
+      
   #### Vulnerability #2
-  In the gitignore, there is not ignorance of .pem files, the files used for key generation. This will likely lead to a user or users leaking keys at some point.
+  In the gitignore, there is no ignorance of .pem files, the files used for key generation. This will likely lead to a user or users leaking keys at some point.
   This is a common way that users leak private information on the internet and has potential to cause issues later down the line as commit history cannot be removed.
+  
+  If a user were to fork the GitHub and make their fork public, they could accidentally push their private and public keys and leak them to the internet. This would then allow malicious users to impersonate them.
+  
   #### Vulnerability #3
-  Oops! We forgot to discard messages from users where the signature does not match, the message will still be forwarded provided it can be decoded and will identify the user based on their client-id and server-id.
+  No input validation is being run for the messages sent from a client to the server. As mentioned in **vulnerability #1** there exists a buffer overflow vulnerability in the servers. **Vulnerability #3** provides malicious clients the vector to overflow the buffer and inject shellcode into the program.
+  
+  
   #### Vulnerability #4
-  No input validation is being run for messages on the client or the server. This will allow buffer overflow vulnerabilities.
-  #### Vulnerability #5
-  When a client connects to a server, it stores the last assigned client ID in an integer so it know what client ID to give out next. If somebody connects and disconnects over and over, regenerating their keys each time, the integer could be overflowed (it is more likely that the server would instead crash). Before this, it is more likely that the mapping would be flooded with clients and become a large file. Since the server reads this file and converts it to a map, it would slow down the server performance drastically or crash it.
+The server mapping JSON files are not cleared over time.
+When clients connect to a server, if it is their first time connecting, it assigns them an ID and adds their public key to a JSON file containing ID<->Public Key mappings. If the server were to take on enough clients and the JSON mapping file were to become large enough, when the server reads this file and converts it to a map, it would consume too much memory and drastically decrease the server performance or cause it to crash. This could occur across the entire network and cripple it. A PoC won't be provided as it requires **many** clients to exploit this vulnerability, but it is likely that clients would need to accumulate over a period of time to exploit this vulnerability.
 
 ### Use of AI and LLMs
 
-In secure programming there is an aversion to using LLMs and AI to code and solve cybersecurity problems. This is because LLMs and modern AI lacks the understanding of context. For example, ChatGPT it is unable to determine why a network is segmented only that secure networks are segmented. It can regurgitate the same output from the internet it recorded but it will not fundermentally understand the concept the way you and we do. We only used LLMs were neccessary or, if the resource was unavailable. ChatGPT is good at writing small functions that accomplish a well versed and already completed goal. AI is good for collating already discovered knowledge and applying it quickly. Thus, ChatGPT was used to develop Base64, SHA256 and Hex <-> Bytes conversions. We also used it write the rsaEncrypt and rsaDecrypt functions. Modern OpenSSL was hard to develop with a distinct lack of documentation for the variety of implementation configurations. We had originally planned for one of our other group members to spend some time learning the library to ensure the implementation was secure. This did not happen, and ChatGPT was simply used. This will cause the most issues for operability between groups as ChatGPT appears to prefer OpenSSL v1.1.2 not the newest OpenSSL v3.0.2. Users running older versions of WSL/Ubuntu 20.04 and older will not be able to update OpenSSL to the new standard either. 
+In secure programming there is an aversion to using LLMs and AI to code and solve cybersecurity problems. This is because LLMs and modern AI lacks the understanding of context. For example, ChatGPT is unable to determine why a network is segmented, only that secure networks are segmented. It can regurgitate the data from the internet that it was trained on, but will not understand context the way people do. It is not all knowing, cannot give the best (or even correct) ideas for every prompt it is provided, and is limited by its training data. For this project, we used LLMs when neccessary, or if resources to aid our use of libraries were unavailable. AI is effective at collating knowledge and applying it quickly and conveniently. It has the ability to help improve the understanding of security and programming concepts, but cannot be blindly trusted. 
+
+ChatGPT is useful for generating small functions that accomplish a well versed and already completed goal. Thus, it was used to develop Base64, SHA256 and Hex <-> Bytes conversions. We also used it to write the rsaEncrypt and rsaDecrypt functions. Modern OpenSSL was hard to develop with a distinct lack of documentation for the variety of implementation configurations. We had originally planned for one of our other group members to spend some time learning the library to ensure the implementation was secure. However, this did not happen, and instead ChatGPT was used. This will cause the most issues for operability between groups as ChatGPT appears to prefer OpenSSL v1.1.2, not the newest OpenSSL v3.0.2. Users running older versions of WSL/Ubuntu 20.04 and older will not be able to update OpenSSL to the new standard either. 
+
+We found that it was more effective to discuss approaches to handling security issues with each other, rather than ChatGPT as it helped us maintain an understanding of the implementation, and was beneficial for learning secure programming. Using AI made us realize how much more powerful it has become, as it was very helpful for implementing features, however, it also showed us that it is best to use it to spark our own ideas rather than entirely trusting it as some of its suggestions created issues for us.
 
 # Reflection of Feedback, Self Critique and Biases/Consequences, and the Cyber Skill Shortage
 
@@ -164,8 +189,7 @@ In secure programming there is an aversion to using LLMs and AI to code and solv
 
 # Appendix
 
-Appendix 1:
-RSA:
+**Appendix 1: RSA:**
 ```
 Asymmetric encryption and decryption is performed with RSA.
 
@@ -174,7 +198,7 @@ Public exponent (e) = 65537
 Padding scheme: OAEP with SHA-256 digest/hash function
 Public keys are exported in PEM encoding with SPKI format.
 ```
-Appendix 2: AES:
+**Appendix 2: AES:**
 ```
 Symmetric encryption is performed with AES in GCM mode.
 
@@ -183,10 +207,13 @@ Additional/associated data = not used (empty).
 Key length: 16 bytes (128 bits)
 Authentication tag: 16 bytes (128 bits). The authentication tag takes up the final 128 bits of the ciphertext.
 ```
-Appendix 3: MITM Attack Diagram
+**Appendix 3: MITM Attack Diagram**
+
 ![alt text](image.png)
 
-Appendix 4: Documentation on Installing and Running the Code
+In this situation Client A and Client B want to connect and share secret information. The Malicious Server advertises Client C to Client A and Client D to Client B. If both clients connect to the malicious clients, the MITM can store the data will replaying it to each server without them knowing. This requires a little bit of social engineering to have the clients connect correctly or another vulnerability in the implementation but note it is still possible.
+
+**Appendix 4: Documentation on Installing and Running the Code**
 ```
 # Implementation of Olaf-Neighbourhood Protocol for Tutorial 7
 
@@ -225,21 +252,22 @@ We are using a makefile for compiling our code.
 
 Our implementation is modified to heavily use server and client IDs to simplify the identification of servers and clients.
   - We are sending them in client lists, client updates, and private chats.
-  - We also have some code to generate a time to die, however it has not been implemented yet.
+  - We also have time to die, however it has not been implemented yet.
 
 # Running Clients and Servers
 
-- Currently for our testing there exists server, server2 and server3.
+- In our current build, we have server, server2 and server3.
   
     - server runs on ws://localhost:9002, server1 runs on ws://localhost:9003 and server3 runs on ws://localhost:9004
   
-    - To compile servers, run ```make servers```
+    - To compile servers, run 'make servers'
 
 - See 'How to set up new Servers below' to see what files need to be changed to modify the neighbourhood.
   
 - Currently there exists userClient (which takes input from stdin)
-  -  We have been using testClient's for automated testing but the userClient is easier to use.
-    - To compile userClient, run ```make userClient```
+    - We have been using testClient's for automated testing but the userClient is easier to use.
+    
+    - To compile userClient, run 'make userClient'
 
 # How to set up new Servers
 To set up new servers in the neighbourhood there are a few important files to change.
@@ -256,15 +284,15 @@ To set up new servers in the neighbourhood there are a few important files to ch
 # How to set up new Clients
 - In userClient there exists a const int clientNumber which is for their local client number X (nothing to do with their ClientID), this is important for key management.  
 - Deleting client/private_keyX.pem and client/public_keyX.pem where X is the local client number (e.g. testClientX) will regenerate a client's keys when running userClient.
-- Run ```cp userClient userClientY.cpp``` to create another user client.
+- Run 'cp userClient userClientY.cpp' to create another user client.
 - You will need to create a new call in the Makefile for userClientY identical to userClient but replacing the dependency of userClient.cpp with userClientY.cpp.
 
  # How to use the userClient and Server
- Run ```./server``` or ```./serverX``` where X is the number of the server process.
+ Run './server' or './serverX' where X is the number of the server process.
  
- Run ```./userClient``` or ```./userClientX``` where X is the number of the server process to start the userClient.
+ Run './userClient' or './userClientX' where X is the number of the client. This will be suffixed on the key files created for the userClient.
 
- Only one connection exists at a time. Haven't gotten around to fixing the messages being received overwriting the terminal. Does function fine.
+ Only one connection exists at a time. We haven't fixed messages being received overwriting the 'Enter command: ' prompt in the UI. However, it should function properly.
  - connect
  - send message_type
    - Message types are private and public
@@ -304,7 +332,7 @@ To set up new servers in the neighbourhood there are a few important files to ch
 - Client can handle a private chat and decrypt the message if it is meant for them
 ```
 
-Appendix 5: Github Actions, Testing and Test Code.
+**Appendix 5: Github Actions, Testing and Test Code.**
 
 Github Actions: [https://github.com/Aegizz/Tut-7-ON-Imp/actions](https://github.com/Aegizz/Tut-7-ON-Imp/actions) This details every time we pushed or other group members made a Pull Request, and the tests we ran before adding to our main function.
 
@@ -471,7 +499,7 @@ kill $SERVER_PID
 kill $SERVER2_PID
 exit 0
 ```
-Appendix 6: Logs from testing
+**Appendix 6: Logs from testing**
 
 ### Their server:
 ```
@@ -577,7 +605,7 @@ Received message: {"clients":[{"client-id":"test","public-key":"-----BEGIN PUBLI
 server: /usr/local/include/nlohmann/json.hpp:2147: const value_type& nlohmann::json_abi_v3_11_3::basic_json<ObjectType, ArrayType, StringType, BooleanType, NumberIntegerType, NumberUnsignedType, NumberFloatType, AllocatorType, JSONSerializer, BinaryType, CustomBaseClass>::operator[](const typename nlohmann::json_abi_v3_11_3::basic_json<ObjectType, ArrayType, StringType, BooleanType, NumberIntegerType, NumberUnsignedType, NumberFloatType, AllocatorType, JSONSerializer, BinaryType, CustomBaseClass>::object_t::key_type&) const [with ObjectType = std::map; ArrayType = std::vector; StringType = std::__cxx11::basic_string<char>; BooleanType = bool; NumberIntegerType = long int; NumberUnsignedType = long unsigned int; NumberFloatType = double; AllocatorType = std::allocator; JSONSerializer = nlohmann::json_abi_v3_11_3::adl_serializer; BinaryType = std::vector<unsigned char>; CustomBaseClass = void; nlohmann::json_abi_v3_11_3::basic_json<ObjectType, ArrayType, StringType, BooleanType, NumberIntegerType, NumberUnsignedType, NumberFloatType, AllocatorType, JSONSerializer, BinaryType, CustomBaseClass>::const_reference = const nlohmann::json_abi_v3_11_3::basic_json<>&; nlohmann::json_abi_v3_11_3::basic_json<ObjectType, ArrayType, StringType, BooleanType, NumberIntegerType, NumberUnsignedType, NumberFloatType, AllocatorType, JSONSerializer, BinaryType, CustomBaseClass>::value_type = nlohmann::json_abi_v3_11_3::basic_json<>; typename nlohmann::json_abi_v3_11_3::basic_json<ObjectType, ArrayType, StringType, BooleanType, NumberIntegerType, NumberUnsignedType, NumberFloatType, AllocatorType, JSONSerializer, BinaryType, CustomBaseClass>::object_t::key_type = std::__cxx11::basic_string<char>]: Assertion `it != m_data.m_value.object->end()' failed.
 Aborted
 ```
-Appendix 7: PoC for Exploit
+**Appendix 7: PoC for Exploit**
 ```python
 import asyncio
 from websockets.sync.client import connect
@@ -604,7 +632,7 @@ def hello():
 
 hello()
 ```
-Appendix 8:
+**Appendix 8: OLAF/Neighbourhood Protocol Documentation**
 # OLAF/Neighbourhood protocol v1.1.3
 By James, Jack, Tom, Mia, Valen, Isabelle, Katie & Cubie
 
@@ -894,7 +922,7 @@ Symmetric encryption is performed with AES in GCM mode.
 - encrypt the symmetric key used to encrypt the message with the public asymmetric encryption key of the intended recipient
 - format these to be sent as shown in protocol defined messages
 
-Appendix 9:
+**Appendix 9: OLAF/Neighbourhood Protocol Tut7 Documentation**
 # OLAF/Neighbourhood protocol Tut7 v1.1.3
 Based on OLAF/Neighbourhood v1.1.3 protocol by James, Jack, Tom, Mia, Valen, Isabelle, Katie & Cubie
 Modified by Tutorial 7
