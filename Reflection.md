@@ -260,14 +260,14 @@ Our implementation is modified to heavily use server and client IDs to simplify 
   
     - server runs on ws://localhost:9002, server1 runs on ws://localhost:9003 and server3 runs on ws://localhost:9004
   
-    - To compile servers, run 'make servers'
+    - To compile server, run 'make server' or to compile all three servers, run 'make servers'
 
 - See 'How to set up new Servers below' to see what files need to be changed to modify the neighbourhood.
   
-- Currently there exists userClient (which takes input from stdin)
+- Currently there exists userClient, userClient2, userClient3 (which takes input from stdin)
     - We have been using testClient's for automated testing but the userClient is easier to use.
     
-    - To compile userClient, run 'make userClient'
+    - To compile userClient, run 'make userClient' or 'make userClients' to compile all three clients
 
 # How to set up new Servers
 To set up new servers in the neighbourhood there are a few important files to change.
