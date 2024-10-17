@@ -26,7 +26,7 @@ We made these changes due to a few issues that were present in the earlier itera
 
 Firstly, there is no time to die in the final implementation, this can cause potential issues as older packets may be prioritised over newer ones. This is a small nitpick and will only cause issues in cases where the packets are sent out of order. This is highly unlikely since websocket uses TCP not UDP.
 
-Secondly, originally the fingerprinting and signing implementation was not outlined, so as a group we determined that adding client and server id's as a backup would be useful.
+Secondly, originally the fingerprinting and signing implementation was not outlined, so as a group we determined that adding client and server id's as a backup would be useful. However, further details were later released so, incoroporating the IDs into the protocol may have not been necessary. In hindsight, it would have been better to encourage the class to maintain ID mappings, as relying on IDs drastically reduced interoperability and made testing with other groups difficult.
 
 ### Issues with the Original Olaf-Neighbourhood Protocol
 
@@ -83,6 +83,7 @@ Goundsu - Sunjay Gounder
 - Updating RSA keys to spec (with the help of ChatGPT)
 - test_data_message.cpp and test_chat_message.cpp
 - ServerDocumentation.md
+- Management of tasks on trello board and assisting group members
 
 
 ## Reflection of Implementation, Security, Flaws and Decisions
@@ -194,10 +195,6 @@ The other issues like secure websockets not being used and thread safety issues 
 They did however find another problem that we had not considered which was that we are not timing out users. They also mentioned a lack of modular structure being an issue with our code, which we disagree with, but they suggested improving our documentation, which we provided plenty of. This suggests that the documentation may have not been helpful.
 
 Overall, the peer review was somewhat useful as it made us think about some vulnerabilities we had not considered during development. On the other hand, it did not provide any solutions to fixing security vulnerabilities in our implementation and it seems like the vulnerabilities detected might have been generated using AI as some of the descripitions about the vulnerabilities don't seem entirely relevant to our implementation.
-
-## Self Critique and our Biases
-
-
 
 # Appendix
 
@@ -1264,11 +1261,11 @@ The reflective commentary should contain the following information:
 - [x] Your reflection on the standardised protocol.  Even if you had to comply with the agreed implementation (in order to achieve interoperability), you might have had a different view.  Here is the space to comment and give your thoughts on what worked and what didn't work. 
 - [x] Describe and submit your backdoor free version of the code.  Explain design choices in the implementation.  Demonstrate how your code runs (by chatting with your own implementation or by chatting with other implementations).  Discuss lessons learned.  This can also include any bugs reported by other groups. 
 Explain what backdoors/vulnerabilities you added.  What your thoughts and objectives were.  Explain and demonstrate how to exploit your backdoor. 
-- [x] Evaluate the feedback you received from other groups.  Did they find your backdoors?  Did they find other problems in your code?  Was the report useful feedback?  
+- [ ] Evaluate the feedback you received from other groups.  Did they find your backdoors?  Did they find other problems in your code?  Was the report useful feedback?  
 - [ ] For what groups did you provide feedback (name the group and group members).  What feedback did you provide to other groups?  What challenges did you face?  How did you overcome or approach those challenges (e.g., did you talk to the other groups)? 
 
 Reflective Commentary - Self critique and biases/consequences
 Reflective Commentary - Clarity
 Reflective Commentary - Ability to question and self critique and cyber security skill shortage
-Reflective Commentary - Use of AI - Done
+Reflective Commentary - Use of AI
 Feedback Given.
