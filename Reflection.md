@@ -183,7 +183,19 @@ We found that it was more effective to discuss approaches to handling security i
 
 # Reflection of Feedback, Self Critique and Biases/Consequences, and the Cyber Skill Shortage
 
+## Reflection on Feedback we received
 
+Due to a group member's external circumstances, our group had extended deadlines, meaning other students had less time to review our code, and because of this we only received one peer review as a group.
+
+The peer review we received was on the right track to finding **vulnerability #3**, but mentioned a lack of input validation as a vulnerability where user's enter client and server IDs for users they want to send a message to. This however isn't a place that exploits can be started from as this input never interacts with the server or other clients, and is only used so public keys don't have to be entered by clients. They also didn't identify our buffer overflow vulnerability and therefore didn't mention that a lack of input validation could lead to a buffer overflow.
+
+The other issues like secure websockets not being used and thread safety issues were known before submitting the implementation, and were planned to be patched before the peer review was received. They also mentioned that we over-rely on IDs, and that they can introduce security risks but users are not defined by their ID, rather their public keys, so it is unlikely they can manipulate IDs to exploit the chat system, and they provide no examples of how this could be possible. 
+
+They did however find another problem that we had not considered which was that we are not timing out users. They also mentioned a lack of modular structure being an issue with our code, which we disagree with, but they suggested improving our documentation, which we provided plenty of. This suggests that the documentation may have not been helpful.
+
+Overall, the peer review was somewhat useful as it made us think about some vulnerabilities we had not considered during development. On the other hand, it did not provide any solutions to fixing security vulnerabilities in our implementation and it seems like the vulnerabilities detected might have been generated using AI as some of the descripitions about the vulnerabilities don't seem entirely relevant to our implementation.
+
+## Self Critique and our Biases
 
 
 
@@ -260,14 +272,14 @@ Our implementation is modified to heavily use server and client IDs to simplify 
   
     - server runs on ws://localhost:9002, server1 runs on ws://localhost:9003 and server3 runs on ws://localhost:9004
   
-    - To compile server, run 'make server' or to compile all three servers, run 'make servers'
+    - To compile servers, run 'make servers'
 
 - See 'How to set up new Servers below' to see what files need to be changed to modify the neighbourhood.
   
-- Currently there exists userClient, userClient2, userClient3 (which takes input from stdin)
+- Currently there exists userClient (which takes input from stdin)
     - We have been using testClient's for automated testing but the userClient is easier to use.
     
-    - To compile userClient, run 'make userClient' or 'make userClients' to compile all three clients
+    - To compile userClient, run 'make userClient'
 
 # How to set up new Servers
 To set up new servers in the neighbourhood there are a few important files to change.
@@ -1252,11 +1264,11 @@ The reflective commentary should contain the following information:
 - [x] Your reflection on the standardised protocol.  Even if you had to comply with the agreed implementation (in order to achieve interoperability), you might have had a different view.  Here is the space to comment and give your thoughts on what worked and what didn't work. 
 - [x] Describe and submit your backdoor free version of the code.  Explain design choices in the implementation.  Demonstrate how your code runs (by chatting with your own implementation or by chatting with other implementations).  Discuss lessons learned.  This can also include any bugs reported by other groups. 
 Explain what backdoors/vulnerabilities you added.  What your thoughts and objectives were.  Explain and demonstrate how to exploit your backdoor. 
-- [ ] Evaluate the feedback you received from other groups.  Did they find your backdoors?  Did they find other problems in your code?  Was the report useful feedback?  
+- [x] Evaluate the feedback you received from other groups.  Did they find your backdoors?  Did they find other problems in your code?  Was the report useful feedback?  
 - [ ] For what groups did you provide feedback (name the group and group members).  What feedback did you provide to other groups?  What challenges did you face?  How did you overcome or approach those challenges (e.g., did you talk to the other groups)? 
 
 Reflective Commentary - Self critique and biases/consequences
 Reflective Commentary - Clarity
 Reflective Commentary - Ability to question and self critique and cyber security skill shortage
-Reflective Commentary - Use of AI
+Reflective Commentary - Use of AI - Done
 Feedback Given.
