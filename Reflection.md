@@ -197,7 +197,7 @@ The other issues like secure websockets not being used and thread safety issues 
 
 They did however find another problem that we had not considered which was that we are not timing out users. They also mentioned a lack of modular structure being an issue with our code, which we don't think is a valid point, but they also suggested improving our documentation, which we provided plenty of. This suggests that the documentation may have not been helpful for users. The documentation should have been either trimmed down to include the important features and functions, or provide details on other functions that were not documented. These changes would have helped reviewers follow our code better and understand the structure of our repository.
 
-Overall, the peer review was somewhat useful as it made us think about some vulnerabilities we had not considered during development. On the other hand, it did not provide any solutions to fixing security vulnerabilities in our implementation and it seems like the vulnerabilities detected might have been generated using AI as some of the descripitions about the vulnerabilities don't seem entirely relevant to our implementation.
+Overall, the peer review was somewhat useful as it made us think about some vulnerabilities we had not considered during development. On the other hand, it did not provide any solutions to fixing security vulnerabilities in our implementation and it seems like the vulnerabilities detected might have been generated using AI as some of the descripitions about the vulnerabilities don't seem entirely relevant to our implementation. It also provided no details on processes used for testing and if they even managed to get the implementation running on their system.
 
 # Appendix
 
@@ -1264,7 +1264,7 @@ The reflective commentary should contain the following information:
 - [x] Your reflection on the standardised protocol.  Even if you had to comply with the agreed implementation (in order to achieve interoperability), you might have had a different view.  Here is the space to comment and give your thoughts on what worked and what didn't work. 
 - [x] Describe and submit your backdoor free version of the code.  Explain design choices in the implementation.  Demonstrate how your code runs (by chatting with your own implementation or by chatting with other implementations).  Discuss lessons learned.  This can also include any bugs reported by other groups. 
 Explain what backdoors/vulnerabilities you added.  What your thoughts and objectives were.  Explain and demonstrate how to exploit your backdoor. 
-- [ ] Evaluate the feedback you received from other groups.  Did they find your backdoors?  Did they find other problems in your code?  Was the report useful feedback?  
+- [x] Evaluate the feedback you received from other groups.  Did they find your backdoors?  Did they find other problems in your code?  Was the report useful feedback?  
 - [ ] For what groups did you provide feedback (name the group and group members).  What feedback did you provide to other groups?  What challenges did you face?  How did you overcome or approach those challenges (e.g., did you talk to the other groups)? 
 
 Reflective Commentary - Self critique and biases/consequences
