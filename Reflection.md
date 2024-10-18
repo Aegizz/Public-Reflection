@@ -214,6 +214,15 @@ We provided feedback to Isaac Joynes' group (no group members were provided in t
 
 Isaac's groups submission contained helpful and concise documentation for using their implementation, so there weren't any challenges in using their implementation, finding vulnerabilities and providing them with feedback. The biggest challenge we faced was understanding how the HTTP server used for file sharing worked. To overcome this issue, we looked online into the library they were using called aiohttp, which showed us that we could not modify the server to exploit it with RCE.
 
+### Feedback for Alex Mathew
+We provided feedback to Alex Mathew's group, no group members were provided to us as there was no readme. This means I needed to spend time installing and seting up node.js ourselves. I had  a little experience with the environment before and thus did not need any external help. There was three vulnerabilities we noted:
+1. There is a possibility of an open redirect vulnerability by using a username (which doubles as a member ID) that could be a URL to another website. With a crafted payload, this could potentially be exploited to 
+redirect users.
+2. There are no restrictions on the types of files that can be uploaded. This poses a significant risk for the server, as it opens the door for an attacker to upload malicious files, such as a web shell, which could lead to privilege escalation.
+3.  Interestingly, the username appears to be set via localStorage in the app.js file. This raises a security concern, as localStorage can be easily manipulated by a user. This not only allows for name spoofing but also overrides the username[0].id value, which can be observed on line 330 of the app.js file.
+
+It appears they also had some websocket connections being initialised as "backdoors" these websockets do not run any code and thus does not achieve much.
+
 # Appendix
 
 ## Appendix 1: RSA:
