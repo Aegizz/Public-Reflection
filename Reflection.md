@@ -701,9 +701,14 @@ hello()
 
 To shorten the already long appendix, here is [a link](https://github.com/Aegizz/Public-Reflection/blob/main/Peer%20Review3.pdf) to the feedback stored in our GitHub repo.
 
-# Appendix 11: Feedback for Alex Mathew
+## Appendix 11: Feedback for Alex Mathew
 
 To shorten the already long appendix, here is [a link](https://github.com/Aegizz/Public-Reflection/blob/main/Peer%20Review-1%20Lloyd.pdf) to the feedback stored in our GitHub repo.
+
+## Appendix 12: Demo of System Running
+![alt text](demo1.png)
+
+![alt text](demo2.png)
 
 
 # Biblography
