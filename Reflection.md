@@ -26,7 +26,10 @@ We made these changes due to a few issues that were present in the earlier itera
 
 Firstly, there is no time to die in the final implementation, this can cause potential issues as older packets may be prioritised over newer ones. This is a small nitpick and will only cause issues in cases where the packets are sent out of order. This is highly unlikely since websocket uses TCP not UDP.
 
-Secondly, originally the fingerprinting and signing implementation was not outlined, so as a group we determined that adding client and server id's as a backup would be useful. However, further details were later released so, incoroporating the IDs into the protocol may have not been necessary. In hindsight, it would have been better to encourage the class to maintain ID mappings, as relying on IDs drastically reduced interoperability and made testing with other groups difficult.
+Secondly, the fingerprinting and signing implementation was originally not outlined, so as a group we determined that adding client and server id's as a backup would be useful. However, further details were later released so, incoroporating the IDs into the protocol may have not been necessary. 
+
+In hindsight, it would have been better to encourage the tutorial class to maintain ID mappings on their end rather than sending IDs, as relying on IDs being present in messages like our modified protocol does reduces interoperability with other groups and made testing with others challenging.
+We tried to have fail-safes in our code, so if ids weren't present, it would still be able to function.
 
 ### Issues with the Original Olaf-Neighbourhood Protocol
 
@@ -38,13 +41,15 @@ Key issues with the protocol:
 4. Handling Portflooding
 5. Server to Server Signing and Verification
 
-The standarised encryption was well documentated, the issue lay with the implemenation. Since RSA and AES has a wide range of standards and models, accurately implementing these methods between a wide range of coding languages, libraries, and versions of libraries proved problematic. A good example of this is when we updated our signing method to match the new spec after it was updated. One of our group members was operating on OpenSSL v1.1.2 whereas the others were on OpenSSL v3.0.2. Thus when the group member updated the specification to match the OpenSSL v1.1.2 implementation, our systems would fail to sign the keys without a relevant warning.
+The standarised encryption was well documentated, the issue lay with the implemenation. Since RSA and AES has a wide range of standards and models, accurately implementing these methods between a wide range of coding languages, libraries, and versions of libraries proved problematic. A good example of this is when we updated our signing method to match the new spec after it was updated. One of our group members was operating on OpenSSL v1.1.2 whereas the others were on OpenSSL v3.0.2. Thus when the group member updated the specification to match the OpenSSL v1.1.2 implementation, our systems would fail to sign the keys without a relevant warning. If we had been more involved in the protocol design process for the cohort, we may have been able to provide some alternative ideas to improve the protocol or gain further details about what others were thinking about when designing the Olaf-Neighbourhood protocol.
 
-JSON is a popular format for organising data and ensuring the format between each system remains the same. This is beneficial for communicating data between different coding languages and systems. Issues occurred when hashing functions were used to sign these JSON messages, as slight variations in the implementations the JSON strings caused inconsistent hashes for what were essentially identical JSON packets. An example of this is when the "json" python library function dump() is called, there is a whitespace at the begining of the resulting string, causing the hash of the string to be different and thus the signature verification to fail for those not using the python "json" library. We recommended removing whitespace for hashing, but were unsure about the effectivness as there is a distinct lack of communication between groups. 
+JSON is a popular format for organising data and ensuring the format between each system remains the same. This is beneficial for communicating data between different coding languages and systems. Issues occurred when hashing functions were used to sign these JSON messages, as slight variations in the implementations the JSON strings caused inconsistent hashes for what were essentially identical JSON packets. An example of this is when the "json" python library function dump() is called, there is a whitespace at the begining of the resulting string, causing the hash of the string to be different and thus the signature verification to fail for those not using the python "json" library. We recommended removing whitespace for hashing, but were unsure about the effectivness as there is a distinct lack of communication between groups.
 
-Due to the nature of using websockets there is always the possibility of multithreading and portflooding causing issues. If multiple servers are running on a client there's a possibility of flooding the server with connections and causing a DoS attack. The other issue is relating to multithreading. Websocket is not designed for fast communication with a large number of clients; this problem is exacerbated by the use of slower programming languages like Python with its global interpreter lock. This will lead to similar DoS attacks if not handled correctly by the implementor (Less of a design flaw but is worth noting that it should be included in the documentation).
+Due to the nature of using websockets, there is always the possibility of multithreading and portflooding causing issues. If multiple servers are running on a client, there's a possibility of flooding the server with connections and causing a DoS attack. The other issue is that Websocket is not designed for fast communication with a large number of clients. This problem is exacerbated by the use of slower programming languages like Python with its global interpreter lock. If multithreading is not being utilised, this will lead to similar DoS attacks if not handled correctly by the implementor (Less of a design flaw but is worth noting that it should be included in the documentation).
 
-Server to server signing and verification is a vital component of interserver communication. If a user is able to set up their own server and client, there is the possibility of a MITM attack where a malicious actor creates a server and client setup that is used for communication and simply replays the message to each client as if they are communicating to each other.
+Server to server signing and verification is a vital component of interserver communication and was not clearly defined in the protocol when implementation began. This provided challenges for many other groups and should have been addressed sooner. Rather than waiting for the Olaf-Neighbourhood protocol designers to find and fix the issue themseves, we should have raised this issue when we were confused about the signature process, and whether servers maintain their own keys.
+
+If signatures are not implemented properly, a malicious agent is able to set up their own server and could replay messages or create their own malicious messages on behalf of the clients they are impersonating, while other clients are unaware of any malfeasance. 
 
 See Appendix 3: MITM Attack Diagram for a diagram of an example where a malicious server could advertise to be a different user while storing the data and replay it to the actual user.
 
@@ -88,7 +93,7 @@ Goundsu - Sunjay Gounder
 
 ## Reflection of Implementation, Security, Flaws and Decisions
 
-When creating and desinging a project there are always choices to be made, deciding between a method or choice of implementation impacts the quality, security and operability of a code base. The key decisions we will outline are:
+When creating and desinging a project there are always choices to be made. Deciding between a method or choice of implementation impacts the quality, security and operability of a code base. The key decisions we will outline are:
 
 1. Coding Language
 2. Libraries
@@ -99,7 +104,7 @@ When creating and desinging a project there are always choices to be made, decid
 
 ### Coding Language
 
-Since the design for this assignment was to learn about unsafe coding practices and vulnerabilities in code, a low-level, non-memory safe language is always optimal for designing an insecure implementation. This limits our languages, to Assembly, C, C++, C/C++ Header, Cython, D (ASD, 2024). In our opinion, C++ is the best choice here as we can use the plethora of libraries to support and minimise the need for developing JSON and Websocket packages. It is also well documented to simplify integration with other systems, and is compatible for a wide range of systems. C++ also has the capabilities of using C library functions, many of which are insecure, making it simple to develop insecure code. Finally, it is a language we as a group are familiar with and have experience programming in.
+Since the design for this assignment was to learn about unsafe coding practices and vulnerabilities in code, a low-level, non-memory safe language is always optimal for designing an insecure implementation. This limits our languages, to Assembly, C, C++, C/C++ Header, Cython, D (ASD, 2024). In our opinion, C++ is the best choice here as we can use the plethora of libraries to support and minimise the need for developing JSON and Websocket packages. It is also well documented to simplify integration with other systems, and is compatible for a wide range of systems. C++ also has the capabilities of using C library functions, many of which are insecure, making it simple to develop insecure code. Finally, it is a language that the majority of our group is familiar with and have experience programming in. Looking back on it, it likely would have made things easier for our group member that was inexperienced with C++ if we had used Python instead, and it may have simplified some of the server-server communication. 
 
 ### Libraries
 
@@ -115,7 +120,7 @@ These encryption methods were challenging for us to implement as there was a lac
 
 **2. websocketpp**
 
-Websocketpp is a C++ library that implements RFC6455 Websocket Protocol, allowing us to integrate the protocol into our C++ programs. This library enabled us to initiate connections from clients to servers. Examples existed to help us start the project, however, the documentation was quite overwhelming. This led to a reliance on AI generated code to learn the library, however, we eventually became familiar enough with the library to not need ChatGPT. Though it was never mentioned in the public protocol page, (was not sure if it infringed on academic integrity rules) server-server communication was only possible through servers spawning their own clients to make connections to other servers. This was a major hurdle to overcome that was likely brought upon by our choice of programming language.
+Websocketpp is a C++ library that implements RFC6455 Websocket Protocol, allowing us to integrate the protocol into our C++ programs. This library enabled us to initiate connections from clients to servers. Examples existed to help us start the project, however, the documentation was quite overwhelming. This led to a reliance on AI generated code to learn the library, however, we eventually became familiar enough with the library to not need ChatGPT. Though it was never mentioned in the public protocol page, (was not sure if it infringed on academic integrity rules) server-server communication was only possible through servers spawning their own clients to make connections to other servers. This was a major hurdle to overcome that was likely brought upon by our choice of programming language. As mentioned before, if we had used Javascript or the Python library for websockets, it may have made the implementation simpler for all of us, and not brought about this issue with server-server connections.
 
 **3. nlohmann/json**
 
@@ -131,7 +136,7 @@ From the initial stages of our development, we have employed testing via GitHub 
 
 See **Appendix 5** for Testing Workflow.
 
-This testing methodology enabled us to prevent code that did not work from appearing on the main branch of the project and ensured that each user was closely following the specification.
+This testing methodology enabled us to prevent code that did not work from appearing on the main branch of the project and ensured that each user was closely following the specification. It only ran automated tests on client code, not server code, so testing for server code was done by whoever was implementing it, with no screenshots or proof of it. We should have made it a group initiative to write test scripts for our server code so other users could make changes and automatically test their changes.
 
 ### Bugs and Operability between Groups
 
@@ -139,13 +144,13 @@ Since a major focus of this project is to build a messaging app that integrates 
 
 See **Appendix 6** for logs of testing with another group.
 
-This group failed to implement signing and encryption yet, so this caused issues when deploying our clients, but server to server communication worked sucessfully. An issue we encountered was the use of JSON strings and JSON arrays for the data. In the original specification, the data JSON object was changed to and from JSON strings and arrays depending on reception about the change. Luckily, we were able to quickly modify our implementation to ensure compataibility.
+This group had failed to implement signing and encryption at this point, so this caused issues when deploying our clients, but server to server communication worked sucessfully. An issue we encountered was the use of JSON strings and JSON arrays for the data. In the original specification, the data JSON object was changed to and from JSON strings and arrays depending on reception about the change. Luckily, we were able to quickly modify our implementation to ensure compataibility.
 
-We had met with another group earlier in the development process to test, but the group could not launch their server after around 3-4 hours of waiting. A dedicated opportunity for students to test interoperability would have been beneficial, but since development began so close to the deadline we lacked the time and opportunity due to workload.
+We had met with another group earlier in the development process to test, but the group could not launch their server after around 3-4 hours of waiting. A dedicated opportunity for students to test interoperability would have been beneficial, but since development began so close to the project deadline, we lacked the time and opportunity other more organised groups may have had due to the workload we had made for ourselves.
 
 ### Backdoors and Vulnerabilities
 
-We noted five different vulnerabilities and one backdoor in this code. 
+We noted four different vulnerabilities and one backdoor in this code. 
 
 
   #### Vulnerability #1
@@ -164,15 +169,15 @@ This exploit will only work unless the memory locations are correct and they wil
   In the gitignore, there is no ignorance of .pem files, the files used for key generation. This will likely lead to a user or users leaking keys at some point.
   This is a common way that users leak private information on the internet and has potential to cause issues later down the line as commit history cannot be removed.
   
-  If a user were to fork the GitHub and make their fork public, they could accidentally push their private and public keys and leak them to the internet. This would then allow malicious users to impersonate them.
+  If a user were to fork the GitHub of our implementation and make their fork public, they could accidentally push their private and public keys and leak them to the internet. This would then allow other malicious users using the system to steal the keys and impersonate the victim user.
   
   #### Vulnerability #3
-  No input validation is being run for the messages sent from a client to the server. As mentioned in **vulnerability #1** there exists a buffer overflow vulnerability in the servers. **Vulnerability #3** provides malicious clients the vector to overflow the buffer and inject shellcode into the program.
+  No input validation is being run for the messages sent from a client to the server. As mentioned in **vulnerability #1** there exists a buffer overflow vulnerability in the servers. **Vulnerability #3** provides malicious clients the vector to overflow the buffer and inject shellcode into the servers.
   
   
   #### Vulnerability #4
 The server mapping JSON files are not cleared over time.
-When clients connect to a server, if it is their first time connecting, it assigns them an ID and adds their public key to a JSON file containing ID<->Public Key mappings. If the server were to take on enough clients and the JSON mapping file were to become large enough, when the server reads this file and converts it to a map, it would consume too much memory and drastically decrease the server performance or cause it to crash. This could occur across the entire network and cripple it. A PoC won't be provided as it requires **many** clients to exploit this vulnerability, but it is likely that clients would need to accumulate over a period of time to exploit this vulnerability.
+When clients connect to a server, if it is their first time connecting, it assigns them an ID and adds their public key to a JSON file containing ID<->Public Key mappings. If the server were to take on enough clients and the JSON mapping file were to become large enough, when the server reads this file and converts it to a map, it would consume too much memory and drastically decrease the server performance or cause it to crash. This could occur across the entire network and cripple it. A PoC won't be provided as it requires **many** clients to exploit this vulnerability and it is likely that clients would have to accumulate over a period of time, rather than being able to instaneously exploit the vulnerabilty.
 
 ### Use of AI and LLMs
 
@@ -182,8 +187,6 @@ ChatGPT is useful for generating small functions that accomplish a well versed a
 
 We found that it was more effective to discuss approaches to handling security issues with each other, rather than ChatGPT as it helped us maintain an understanding of the implementation, and was beneficial for learning secure programming. Using AI made us realize how much more powerful it has become, as it was very helpful for implementing features, however, it also showed us that it is best to use it to spark our own ideas rather than entirely trusting it as some of its suggestions created issues for us.
 
-# Reflection of Feedback, Self Critique and Biases/Consequences, and the Cyber Skill Shortage
-
 ## Reflection on Feedback we received
 
 Due to a group member's external circumstances, our group had extended deadlines, meaning other students had less time to review our code, and because of this we only received one peer review as a group.
@@ -192,7 +195,7 @@ The peer review we received was on the right track to finding **vulnerability #3
 
 The other issues like secure websockets not being used and thread safety issues were known before submitting the implementation, and were planned to be patched before the peer review was received. They also mentioned that we over-rely on IDs, and that they can introduce security risks but users are not defined by their ID, rather their public keys, so it is unlikely they can manipulate IDs to exploit the chat system, and they provide no examples of how this could be possible. 
 
-They did however find another problem that we had not considered which was that we are not timing out users. They also mentioned a lack of modular structure being an issue with our code, which we disagree with, but they suggested improving our documentation, which we provided plenty of. This suggests that the documentation may have not been helpful.
+They did however find another problem that we had not considered which was that we are not timing out users. They also mentioned a lack of modular structure being an issue with our code, which we don't think is a valid point, but they also suggested improving our documentation, which we provided plenty of. This suggests that the documentation may have not been helpful for users. The documentation should have been either trimmed down to include the important features and functions, or provide details on other functions that were not documented. These changes would have helped reviewers follow our code better and understand the structure of our repository.
 
 Overall, the peer review was somewhat useful as it made us think about some vulnerabilities we had not considered during development. On the other hand, it did not provide any solutions to fixing security vulnerabilities in our implementation and it seems like the vulnerabilities detected might have been generated using AI as some of the descripitions about the vulnerabilities don't seem entirely relevant to our implementation.
 
