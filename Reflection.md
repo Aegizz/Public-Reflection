@@ -55,7 +55,7 @@ See Appendix 3: MITM Attack Diagram for a diagram of an example where a maliciou
 
 ### Individual Contributions
 
-Aegizz - Lloyd Draysey
+Aegizz - Lloyd Draysey a1870678
 
 gradyclark03 - Graydon Clark a1851704
 
