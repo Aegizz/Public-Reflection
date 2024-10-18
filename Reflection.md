@@ -12,7 +12,7 @@ Our practical group had originally seen this protocol but decided against follow
 
 1. Reflection of Protocol
 2. Reflection of Implementation, Security, Flaws and Decisions
-3. Reflection of Feedback, Self critique and biases/consequences, and the Cyber Skill Shortage
+3. Reflection of Feedback
 
 ## Reflection on Standarised Protocol
 The Olaf-Neighbourhood protocol is fairly well documentated and fleshed out now, as we head towards the end of the semester. This was not the case around 5 weeks ago when the voting of each protocol was organised. There has been around 35 commits to the original protocol since the beginning of the assignment that had fixed our problems with it. In the mean time, our practical/tutorial group had mutually agreed to use a modified version with a fork of their documentation.
@@ -55,15 +55,15 @@ See Appendix 3: MITM Attack Diagram for a diagram of an example where a maliciou
 
 ### Individual Contributions
 
-Aegizz - Lloyd Draysey a1870678
+Aegizz - Lloyd Draysey a1870678 - 40% Contributions
 
-gradyclark03 - Graydon Clark a1851704
+gradyclark03 - Graydon Clark a1851704 - 40% Contributions
 
-GohnJrey - Christopher Evans a1851242
+GohnJrey - Christopher Evans a1851242 - 10% Contributions
 
-Goundsu - Sunjay Gounder a1860381
+Goundsu - Sunjay Gounder a1860381 - 10% Contributions
 
-**Lloyd's Contributions:**
+**Lloyd's Contributions:** 
 
 - Makefile
 - BOF.py (Original buffer overflow PoC and vulnerability)
@@ -96,6 +96,16 @@ Goundsu - Sunjay Gounder a1860381
 - Implement TTD in websocket_metadata.h and all servers, implemented current_time() in ServerUtilities
 - Implement counter in websocket_metadata.h and all servers
 - Implement some input validation in userclient
+
+**Chris' Contributions:**
+
+- Implemented message decrypt on client
+- Mutex locks for shared data in server
+- RSA key generation
+- Loading keys from PEM files
+- Patched BOF
+- Malformed JSON protections
+- Implemented server map pruning (untested on Chris' branch)
 
 
 ## Reflection of Implementation, Security, Flaws and Decisions
