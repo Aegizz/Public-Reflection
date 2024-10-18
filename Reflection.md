@@ -1,14 +1,14 @@
 
 
-# Advanced Secure Protocol Design, Implementation and Review
+# Advanced Secure Protocol Design, Implementation and Review - Reflective Commentary
 
 **Secure Protocol Documentation and Design**:
-1. [https://github.com/xvk-64/2024-secure-programming-protocol](https://github.com/xvk-64/2024-secure-programming-protocol) or See Appendix 8.
-2. [https://github.com/Aegizz/Tutorial-7-Olaf-Neighbourhood](https://github.com/Aegizz/Tutorial-7-Olaf-Neighbourhood) or See Appendix 9.
+1. [https://github.com/xvk-64/2024-secure-programming-protocol](https://github.com/xvk-64/2024-secure-programming-protocol)
+2. [https://github.com/Aegizz/Tutorial-7-Olaf-Neighbourhood](https://github.com/Aegizz/Tutorial-7-Olaf-Neighbourhood)
 
 Our practical group had originally seen this protocol but decided against following their exact design due to issues with the implementation and difficulty of communicating and organising a fix within external channels.
 
-**Github Repository for Reference**: [https://github.com/Aegizz/Tut-7-ON-Imp](https://github.com/Aegizz/Tut-7-ON-Imp)
+**Github Repository for Reference to our Code**: [https://github.com/Aegizz/Tut-7-ON-Imp](https://github.com/Aegizz/Tut-7-ON-Imp)
 
 1. Reflection of Protocol
 2. Reflection of Implementation, Security, Flaws and Decisions
@@ -45,7 +45,7 @@ The standarised encryption was well documentated, the issue lay with the impleme
 
 JSON is a popular format for organising data and ensuring the format between each system remains the same. This is beneficial for communicating data between different coding languages and systems. Issues occurred when hashing functions were used to sign these JSON messages, as slight variations in the implementations the JSON strings caused inconsistent hashes for what were essentially identical JSON packets. An example of this is when the "json" python library function dump() is called, there is a whitespace at the begining of the resulting string, causing the hash of the string to be different and thus the signature verification to fail for those not using the python "json" library. We recommended removing whitespace for hashing, but were unsure about the effectivness as there is a distinct lack of communication between groups.
 
-Due to the nature of using websockets, there is always the possibility of multithreading and portflooding causing issues. If multiple servers are running on a client, there's a possibility of flooding the server with connections, this would slow the server signficantly and possibly crash it. The other issue is that Websocket is not designed for a large number of clients. This problem is exacerbated by the use of slower programming languages like Python with its global interpreter lock. If multithreading is not being utilised, this will cause exteremly poor performance from the server and possibly enable other kinds of attacks E.g. if a connection is initialised but a client_request or server_hello is not sent in time the server may fail to start correctly causing a DoS attack.
+Due to the nature of using websockets, there is always the possibility of multithreading and portflooding causing issues. If multiple servers are running on a client, there's a possibility of flooding the server with connections and causing a DoS attack. The other issue is that Websocket is not designed for fast communication with a large number of clients. This problem is exacerbated by the use of slower programming languages like Python with its global interpreter lock. If multithreading is not being utilised, this will lead to similar DoS attacks if not handled correctly by the implementor (Less of a design flaw but is worth noting that it should be included in the documentation).
 
 Server to server signing and verification is a vital component of interserver communication and was not clearly defined in the protocol when implementation began. This provided challenges for many other groups and should have been addressed sooner. Rather than waiting for the Olaf-Neighbourhood protocol designers to find and fix the issue themseves, we should have raised this issue when we were confused about the signature process, and whether servers maintain their own keys.
 
@@ -55,15 +55,13 @@ See Appendix 3: MITM Attack Diagram for a diagram of an example where a maliciou
 
 ### Individual Contributions
 
-[Github - contributors](https://github.com/Aegizz/Tut-7-ON-Imp/graphs/contributors)
-
 Aegizz - Lloyd Draysey
 
-gradyclark03 - Graydon Clark
+gradyclark03 - Graydon Clark a1851704
 
-GohnJrey - Christopher Evans
+GohnJrey - Christopher Evans a1851242
 
-Goundsu - Sunjay Gounder
+Goundsu - Sunjay Gounder a1860381
 
 **Lloyd's Contributions:**
 
@@ -91,6 +89,13 @@ Goundsu - Sunjay Gounder
 - test_data_message.cpp and test_chat_message.cpp
 - ServerDocumentation.md
 - Management of tasks on trello board and assisting group members
+ 
+**Sunjay's Contributions:**
+
+- Implement some of userClient, i.e counter, some of send private, and send public 
+- Implement TTD in websocket_metadata.h and all servers, implemented current_time() in ServerUtilities
+- Implement counter in websocket_metadata.h and all servers
+- Implement some input validation in userclient
 
 
 ## Reflection of Implementation, Security, Flaws and Decisions
@@ -152,8 +157,7 @@ We had met with another group earlier in the development process to test, but th
 
 ### Backdoors and Vulnerabilities
 
-We noted four different vulnerabilities and one backdoor in this code. 
-
+We noted four different vulnerabilities and one backdoor in our code. 
 
   #### Vulnerability #1
   In server.cpp, there is an insecure string copy which can cause a stack overflow, luckily it is protected by the compiler.... except that the developer disabled stack protection and memory protection for debugging!!! Oh no!
@@ -163,7 +167,7 @@ We noted four different vulnerabilities and one backdoor in this code.
      
 Vulnerability #1 is the most important of these as it allows us to achieve shell via a buffer overflow on any machine. Buffer overflows, are one of the most common types of RCE vulnerabilities and using C++ allowed us to implement this with relative ease. Currently there is a PoC python exploit in the repository.
 
-See **Appendix 7** for PoC python exploit code.
+See **Appendix 7** for PoC python BOF exploit code.
 
 This exploit will only work unless the memory locations are correct and they will vary from system to system, so to get this working on another system, it may require testing. This vulnerability also doubles as a DoS attack due to the server crashing from stack smashing. We only enabled the functionality of this when using the server-debug as we did not want to accidentally cause someone's computer to be backdoored when sharing the code to class mates. 
       
@@ -199,11 +203,20 @@ The other issues like secure websockets not being used and thread safety issues 
 
 They did however find another problem that we had not considered which was that we are not timing out users. They also mentioned a lack of modular structure being an issue with our code, which we don't think is a valid point, but they also suggested improving our documentation, which we provided plenty of. This suggests that the documentation may have not been helpful for users. The documentation should have been either trimmed down to include the important features and functions, or provide details on other functions that were not documented. These changes would have helped reviewers follow our code better and understand the structure of our repository.
 
-Overall, the peer review was somewhat useful as it made us think about some vulnerabilities we had not considered during development. On the other hand, it did not provide any solutions to fixing security vulnerabilities in our implementation and it seems like the vulnerabilities detected might have been generated using AI as some of the descripitions about the vulnerabilities don't seem entirely relevant to our implementation. It also provided no details on processes used for testing and if they even managed to get the implementation running on their system.
+Overall, the peer review was somewhat useful as it made us think about some vulnerabilities we had not considered during development. On the other hand, it did not provide any solutions to fixing security vulnerabilities in our implementation and it seems like the vulnerabilities detected might have been generated using AI as some of the descripitions about the vulnerabilities don't seem entirely relevant to our implementation.
+
+## Reflection on Feedback we Wrote
+
+All four of us provided feedback for three other groups, but we are only going to mention three peer reviews which we gave feedback for. 
+
+### Feedback for Isaac Joynes
+We provided feedback to Isaac Joynes' group (no group members were provided in the ReadMe). We provided their group with seven different vulnerabilities. These were no handling of invalid JSON messages on server, private keys stored unencrypted, insecure websockets leading to sniffing packets in plaintext, no authentication of users using RSA signatures, no counter implemented to prevent replay attacks, file upload vulnerabilities including XSS vulnerability and sniffing the curl command packet and obtaining files names of other user's files. Along with identifying the vulnerabilities, we also provided suggestions of how to solve these vulnerabilities. The full detailed feedback provided can all be seen in **Appendix 10**.
+
+Isaac's groups submission contained helpful and concise documentation for using their implementation, so there weren't any challenges in using their implementation, finding vulnerabilities and providing them with feedback. The biggest challenge we faced was understanding how the HTTP server used for file sharing worked. To overcome this issue, we looked online into the library they were using called aiohttp, which showed us that we could not modify the server to exploit it with RCE.
 
 # Appendix
 
-**Appendix 1: RSA:**
+## Appendix 1: RSA:
 ```
 Asymmetric encryption and decryption is performed with RSA.
 
@@ -212,7 +225,7 @@ Public exponent (e) = 65537
 Padding scheme: OAEP with SHA-256 digest/hash function
 Public keys are exported in PEM encoding with SPKI format.
 ```
-**Appendix 2: AES:**
+## Appendix 2: AES:
 ```
 Symmetric encryption is performed with AES in GCM mode.
 
@@ -221,13 +234,13 @@ Additional/associated data = not used (empty).
 Key length: 16 bytes (128 bits)
 Authentication tag: 16 bytes (128 bits). The authentication tag takes up the final 128 bits of the ciphertext.
 ```
-**Appendix 3: MITM Attack Diagram**
+## Appendix 3: MITM Attack Diagram
 
 ![alt text](image.png)
 
 In this situation Client A and Client B want to connect and share secret information. The Malicious Server advertises Client C to Client A and Client D to Client B. If both clients connect to the malicious clients, the MITM can store the data will replaying it to each server without them knowing. This requires a little bit of social engineering to have the clients connect correctly or another vulnerability in the implementation but note it is still possible.
 
-**Appendix 4: Documentation on Installing and Running the Code**
+## Appendix 4: Documentation on Installing and Running the Code
 ```
 # Implementation of Olaf-Neighbourhood Protocol for Tutorial 7
 
@@ -346,7 +359,7 @@ To set up new servers in the neighbourhood there are a few important files to ch
 - Client can handle a private chat and decrypt the message if it is meant for them
 ```
 
-**Appendix 5: Github Actions, Testing and Test Code.**
+## Appendix 5: Github Actions, Testing and Test Code.
 
 Github Actions: [https://github.com/Aegizz/Tut-7-ON-Imp/actions](https://github.com/Aegizz/Tut-7-ON-Imp/actions) This details every time we pushed or other group members made a Pull Request, and the tests we ran before adding to our main function.
 
@@ -513,7 +526,7 @@ kill $SERVER_PID
 kill $SERVER2_PID
 exit 0
 ```
-**Appendix 6: Logs from testing**
+## Appendix 6: Logs from Interoperability Testing
 
 ### Their server:
 ```
@@ -619,7 +632,7 @@ Received message: {"clients":[{"client-id":"test","public-key":"-----BEGIN PUBLI
 server: /usr/local/include/nlohmann/json.hpp:2147: const value_type& nlohmann::json_abi_v3_11_3::basic_json<ObjectType, ArrayType, StringType, BooleanType, NumberIntegerType, NumberUnsignedType, NumberFloatType, AllocatorType, JSONSerializer, BinaryType, CustomBaseClass>::operator[](const typename nlohmann::json_abi_v3_11_3::basic_json<ObjectType, ArrayType, StringType, BooleanType, NumberIntegerType, NumberUnsignedType, NumberFloatType, AllocatorType, JSONSerializer, BinaryType, CustomBaseClass>::object_t::key_type&) const [with ObjectType = std::map; ArrayType = std::vector; StringType = std::__cxx11::basic_string<char>; BooleanType = bool; NumberIntegerType = long int; NumberUnsignedType = long unsigned int; NumberFloatType = double; AllocatorType = std::allocator; JSONSerializer = nlohmann::json_abi_v3_11_3::adl_serializer; BinaryType = std::vector<unsigned char>; CustomBaseClass = void; nlohmann::json_abi_v3_11_3::basic_json<ObjectType, ArrayType, StringType, BooleanType, NumberIntegerType, NumberUnsignedType, NumberFloatType, AllocatorType, JSONSerializer, BinaryType, CustomBaseClass>::const_reference = const nlohmann::json_abi_v3_11_3::basic_json<>&; nlohmann::json_abi_v3_11_3::basic_json<ObjectType, ArrayType, StringType, BooleanType, NumberIntegerType, NumberUnsignedType, NumberFloatType, AllocatorType, JSONSerializer, BinaryType, CustomBaseClass>::value_type = nlohmann::json_abi_v3_11_3::basic_json<>; typename nlohmann::json_abi_v3_11_3::basic_json<ObjectType, ArrayType, StringType, BooleanType, NumberIntegerType, NumberUnsignedType, NumberFloatType, AllocatorType, JSONSerializer, BinaryType, CustomBaseClass>::object_t::key_type = std::__cxx11::basic_string<char>]: Assertion `it != m_data.m_value.object->end()' failed.
 Aborted
 ```
-**Appendix 7: PoC for Exploit**
+## Appendix 7: PoC for BOF Exploit
 ```python
 import asyncio
 from websockets.sync.client import connect
@@ -646,631 +659,18 @@ def hello():
 
 hello()
 ```
-**Appendix 8: OLAF/Neighbourhood Protocol Documentation**
-# OLAF/Neighbourhood protocol v1.1.3
-By James, Jack, Tom, Mia, Valen, Isabelle, Katie & Cubie
 
-## Definitions
-- **User** A user has a key pair. Each user connects to one server at a time.
-- **Server** A server receives messages from clients and relays them towards the destination.
-- **Neighbourhood** Servers organise themselves in a meshed network called a neighborhood. Each server in a neighbourhood is aware of and connects to all other servers
-- **Fingerprint** A fingerprint is the unique identification of a user. It is a string obtained by taking Base64Encode(SHA-256(exported RSA public key)).
+## Appendix 8: OLAF/Neighbourhood Protocol Documentation
+[Olaf Neighbourhood Protocol GitHub](https://github.com/xvk-64/2024-secure-programming-protocol)
 
-## Main design principles
-This protocol specification was obtained by taking parts of the original OLAF protocol combined with the neighbourhood protocol. The network structure resembles the original neighbourhood, while the messages and roles of the servers are similar to OLAF.
+## Appendix 9: OLAF/Neighbourhood Protocol Tut7 Documentation
 
-## Network Topology
-Client-to-client messages travel in the following path:
-```
-Client (Sender)
-  |
-  |  Message sent directly
-  V  
-Server (Owner of the sender)
-  |
-  |  Message routed to the correct server
-  V  
-Server (Owner of the receiver)
-  |
-  |  Message flooded to all receiving clients
-  V  
-Client (Receiver)
-```
+[Tutorial 7 Olaf Neighbourhood Protocol GitHub](https://github.com/Aegizz/Tutorial-7-Olaf-Neighbourhood)
 
-If a server "owns" a client, that just means that the client is connected to that server (Since clients only connect to one server at a time). The transport layer of this protocol uses WebSockets (RFC 6455). 
+## Appendix 10: Feedback for Isaac Joynes
 
-You can call the server you are connected to your home server. You can only connect to users connected to your home server or users on servers directly connected your home server. Refer to the additional file network topology examples, to see examples of neighbourhoods and other potential network arrangements. 
-
-## Protocol defined messages
-All messages are sent as UTF-8 JSON objects. 
-
-### Sent by client
-Messages include a counter and are signed to prevent replay attacks.
-
-All below messages with `data` follow the below structure:
-```JSON
-{
-    "type": "signed_data",
-    "data": {  },
-    "counter": 12345,
-    "signature": "<Base64 encoded (signature of (data JSON concatenated with counter))>"
-}
-```
-`counter` is a monotonically increasing integer. All handlers of a message should track the last counter value sent by a client and reject it if the current value is not greater than the last value. This defeats replay attacks.
-The hash used for `signature` follows the SHA-256 algorithm. 
-base64 encoding follows RFC 4648.
-
-
-#### Hello
-This message is sent when first connecting to a server to establish your public key.
-```JSON
-{
-    "data": {
-        "type": "hello",
-        "public_key": "<Exported PEM of RSA public key>"
-    }
-}
-```
-
-### Chat
-Sent when a user wants to send a chat message to another user[s]. Chat messages are end-to-end encrypted. Only one AES key is generated and is sent to all recipients.
-
-```JSON
-{
-    "data": {
-        "type": "chat",
-        "destination_servers": [
-            "<Address of each recipient's destination server>",
-        ],
-        "iv": "<Base64 encoded (AES initialisation vector)>",
-        "symm_keys": [
-            "<Base64 encoded (AES key encrypted with recipient's public RSA key)>",
-        ],
-        "chat": "<Base64 encoded (AES ciphertext segment)>"
-    }
-}
-
-{
-    "chat": {
-        "participants": [
-            "<Fingerprint of sender comes first>",
-            "<Fingerprints of recipients>",
-        ],
-        "message": "<Plaintext message>"
-    }
-}
-```
-
-Group chats are defined similar to how group emails work. Simply send a message to all recipients with multiple `participants`. The `symm_keys` field is an array which lists the AES key for the message encrypted for each recipient using their respective asymmetric key. Each of the `destination_servers`, `symm_keys`, and `participants` are in the same order, except for the sender, which is only included in the `participants` list.
-
-### Public chat
-Public chats are not encrypted at all and are broadcasted as plaintext.
-
-```JSON
-{
-    "data": {
-        "type": "public_chat",
-        "sender": "<Fingerprint of sender>",
-        "message": "<Plaintext message>"
-    }
-}
-```
-
-### Client list
-To retrieve a list of all currently connected clients on all servers. Your server will send a JSON response. This does not follow the `data` structure.
-
-```JSON
-{
-    "type": "client_list_request",
-}
-```
-Server response:
-```JSON
-{
-    "type": "client_list",
-    "servers": [
-        {
-            "address": "<Address of server>",
-            "clients": [
-                "<PEM of exported RSA public key of client>",
-            ]
-        },
-    ]
-}
-```
-Servers assume that a client/user is online as long as they have an open WebSocket with the home server.
-
-### Sent by server
-#### Client update
-A server will know when a client disconnects as the socket connection will drop off. 
-
-When one of the following things happens, a server should send a `client_update` message to all other servers in the neighbourhood so that they can update their internal state.
-1. A client sends `hello`
-2. A client disconnects
-
-You don't need to send an update for clients who disconnected before sending `hello`.
-
-The `client_update` advertises all currently connected users on a particular server.
-```JSON
-{
-    "type": "client_update",
-    "clients": [
-        "<PEM of exported RSA public key of client>",
-    ]
-}
-```
-
-
-#### Client update request
-When a server comes online, it will have no initial knowledge of clients connected elsewhere, so it needs to request a `client_update` from all other servers in the neighbourhood.
-
-```JSON
-{
-    "type": "client_update_request"
-}
-```
-All other servers respond by sending `client_update`
-
-#### Server Hello
-When a server establishes a connection with another server in the neighbourhood, it sends this message. It doesn't send a public key, as this should be shared prior when agreeing on a neighbourhood, and can be used to verify the identity of the server.
-```JSON
-{
-   "data": {
-        "type": "server_hello",
-        "sender": "<server IP connecting>"
-   }
-}
-```
-
-
-### Definition Tables of Types and Sections and additional explanations
-
-#### tables
-| Type | Type Meaning |
-|:----:|:------------:| 
-| signed_data| data that has a signature confirming the sender|
-| client_list_request | request sent by client, to get the list of clients online connected to a server |
-| client_update | update send by server letting clients know who has disconnected |
-| client_list | reply by server to client_List_request which contains list of users online |
-| client_update_request | server asking other servers for the client_update |
-
-|different types in the data section | meaning |
-| :-----: | :----: |
-| chat | message that has chat message data in it |
-| hello | message sent when client connects to a server |
-| public_chat | message sent to every one connected in the neighbourhood and homeServer not encrypted |
-| server_hello | message sent between server-to-server connections |
-
-#### Counter
-Every message sent by user, tied to their unique key set, has the counter attached to it. The recipient stores the counter value from the latest message sent to them by each user, then when ever a new message received, the counter value stored is compared to the value in the message. If the new value is larger than the old one, the message has not been resent. The starting value of the count will be 0.
-
-The intention behind the addition of the counter is as a way to defend against replay attacks. A replay attack is a when a copy is taken of a message you receive, and is then resent to you later. For example, Alice sends Bob a message saying "meet me at the park at 2pm" and a malicious attacker takes a copy of that message. A few weeks later the malicious attacker resends Bob the message. Bob goes to the park and finds the malicious attacker there instead of Alice.
-
-## File transfers
-File transfers are performed over an HTTP[S] API. The HTTP[s] server end point needs to be hosted at the same address as the WebsSocket server, but it can optionally use different port.
-
-### Upload file
-Upload a file in the same format as an HTTP form.
-```
-"<server>/api/upload" {
-    METHOD: POST
-    body: file
-}
-```
-The server makes no guarantees that it will accept your file or retain it for any given length of time. It can also reject the file based on an arbitrary file size limit. An appropriate `413` error can be returned for this case.
-
-A successful file upload will result in the following response:
-```
-response {
-    body: {
-        file_url: "<...>"
-    }
-}
-```
-`file_url` is a unique URL that points to the uploaded file which can be retrieved later.
-
-### Retrieve file
-```
-"<file_url>" {
-    METHOD: GET
-}
-```
-The server will respond with the file data. File uploads and downloads are not authenticated and secured only by keeping the unique URL secret.
-
-
-## Client Responsibilities
-When receiving a message from the server, the client first needs to validate the signature against the public key of the sender.
-
-### How to send a message?
-There are two things to know about your recipient: their server address and public key. Use these to fill out a `"chat"` message and your server will forward it to the correct destination.
-
-### How do you know when you receive a message for you?
-When receiving a chat message, you should attempt to decrypt the `symm_key` field, then use that to decrypt the `chat` field. If the result follows the format, then the message is directed to you. You can also check for your public key in the `participants` list.
-
-
-## Server Responsibilities
-A server is primarily a relay for messages. It does only a minimal amount of message parsing and state storage.
-
-It is a server's responsibility to not forward garbage, so it should check all messages to ensure they follow a standard message format as above. This includes incoming (from other servers) and outgoing (from clients) messages.
-
-A server is located by an address which optionally includes a port. The default port is the same as http[s]. 80 for non-TLS and 443 for TLS
-- 10.0.0.27:8001
-- my.awesomeserver.net
-- localhost:666
-
-### Stored state
-- Client list. A server should listen to every `client_update` message and use this to keep an internal list of all connected clients in the neighbourhood.
-- Files
-- List of other servers in the neighbourhood
-
-### Adding a new server to a neighbourhood
-The server admins (Whoever is hosting the server) need to agree and each manually add the new server into the stored list.
-If not all servers agree on who is in the neighbourhood, the neighbourhood enters an invalid state and it is not guaranteed that all clients will be able to communicate.
-
-
-## Underlying technologies
-The transport layer uses WebSockets, meaning the server will need to be HTTP-capable. There are various WebSocket libraries for the popular programming languages that will handle this.
-
-## Encryption
-### Asymmetric Encryption
-Asymmetric encryption and decryption is performed with RSA.
-- Key size/Modulus length (n) = 2048 bits
-- Public exponent (e) = 65537
-- Padding scheme: OAEP with SHA-256 digest/hash function
-- Public keys are exported in PEM encoding with SPKI format.
-
-Signing and verification also uses RSA. It shares the same keys as encryption/decryption.
-- Padding scheme: PSS with SHA-256 digest/hash function
-- Salt length: 32 bytes
-
-Symmetric encryption is performed with AES in GCM mode.
-- Initialisation vector (IV) = 16 bytes (Must be randomly generated)
-- Additional/associated data = not used (empty).
-- Key length: 16 bytes (128 bits)
-- Authentication tag: 16 bytes (128 bits). The authentication tag takes up the final 128 bits of the ciphertext.
-
-### Order to apply different layers of encryption
-- message is created
-- create a signature by applying the signature scheme RSA-PSS 
-- encrypt the message using the symmetric encryption specified above
-- encrypt the symmetric key used to encrypt the message with the public asymmetric encryption key of the intended recipient
-- format these to be sent as shown in protocol defined messages
-
-**Appendix 9: OLAF/Neighbourhood Protocol Tut7 Documentation**
-# OLAF/Neighbourhood protocol Tut7 v1.1.3
-Based on OLAF/Neighbourhood v1.1.3 protocol by James, Jack, Tom, Mia, Valen, Isabelle, Katie & Cubie
-Modified by Tutorial 7
-
-## Definitions
-- **User** A user has a key pair. Each user connects to one server at a time.
-- **Server** A server receives messages from clients and relays them towards the destination.
-- **Neighbourhood** Servers organise themselves in a meshed network called a neighborhood. Each server in a neighbourhood is aware of and connects to all other servers
-- **Fingerprint** A fingerprint is the unique identification of a user. It is obtained by taking Base64Encode(SHA-256(exported RSA public key)).
-
-## Main design principles
-This protocol specification was obtained by taking parts of the original OLAF protocol combined with the neighbourhood protocol. The network structure resembles the original neighbourhood, while the messages and roles of the servers are similar to OLAF.
-
-## Network Topology
-Client-to-client messages travel in the following path:
-```
-Client (Sender)
-  |
-  |  Message sent directly
-  V  
-Server (Owner of the sender)
-  |
-  |  Message routed to the correct server
-  V  
-Server (Owner of the receiver)
-  |
-  |  Message flooded to all receiving clients
-  V  
-Client (Receiver)
-```
-
-If a server "owns" a client, that just means that the client is connected to that server (Since clients only connect to one server at a time). The transport layer of this protocol uses Websockets (RFC 6455). 
-
-You can call the server you are connected to your homeserver. You can only connect to users connected to your home server or users on servers directly connected your home server. Refer to the additional file network topology examples, to see examples of neighbourhoods and other potential network arrangments. 
-
-## Protocol defined messages
-All messages are sent as UTF-8 JSON objects. 
-
-### Sent by client
-Messages include a counter and are signed to prevent replay attacks.
-
-All below messages with `data` follow the below structure:
-```JSON
-{
-    "type": "signed_data",
-    "data": {  },
-    "counter": 12345,
-    "signature": "<Base64 encoded (signature of (data JSON concatenated with counter))>"
-}
-```
-`counter` is a monotonically increasing integer. All handlers of a message should track the last counter value sent by a client and reject it if the current value is not greater than the last value. This defeats replay attacks.
-The hash used for `signature` follows the SHA-256 algorithm. 
-base64 encoding follows RFC 4648.
-
-
-#### Hello
-This message is sent when first connecting to a server to establish your public key.
-```JSON
-{
-    "data": {
-        "type": "hello",
-        "public_key": "<Exported PEM of RSA public key>"
-    }
-}
-```
-
-### Chat
-Sent when a user wants to send a chat message to another user[s]. Chat messages are end-to-end encrypted. Time to death is 1 minute.
-
-```JSON
-{
-    "data": {
-        "type": "chat",
-        "destination_servers": [
-            "<Address of each recipient's destination server>",
-        ],
-        "iv": "<Base64 encoded (AES initialisation vector)>",
-        "symm_keys": [
-            "<Base64 encoded (AES key, encrypted with each recipient's public RSA key)>",
-        ],
-        "chat": "<Base64 encoded (AES encrypted segment)>",
-        "client-info":{
-            "client-id":"<client-id>",
-            "server-id":"<server-id>"
-        },
-        "time-to-die":"UTC-Timestamp"
-    }
-}
-
-{
-    "chat": {
-        "participants": [
-            "<Fingerprint of sender comes first>",
-            "<Fingerprints of recipients>",
-        ],
-        "message": "<Plaintext message>"
-    }
-}
-```
-
-Group chats are defined similar to how group emails work. Simply send a message to all recipients with multiple `participants`. The `symm_keys` field is an array which lists the AES key for the message encrypted for each recipient using their respective asymmetric key. Each of the `destination_servers`, `symm_keys`, and `participants` are in the same order, except for the sender, which is only included in the `participants` list.
-
-### Public chat
-Public chats are not encrypted at all and are broadcasted as plaintext.
-
-```JSON
-{
-    "data": {
-        "type": "public_chat",
-        "sender": "<Fingerprint of sender>",
-        "message": "<Plaintext message>"
-    }
-}
-```
-
-### Client list
-To retrieve a list of all currently connected clients on all servers. Your server will send a JSON response. This does not follow the `data` structure.
-
-```JSON
-{
-    "type": "client_list_request",
-}
-```
-Server response:
-```JSON
-{
-    "type": "client_list",
-    "servers": [
-        {
-            "address": "<Address of server>",
-            "server-id":"<server-id>",
-            "clients": [
-                {
-                    "client-id":"<client-id>",
-                    "public-key":"<PEM of exported RSA public key of client>",
-
-                },
-            ]
-        },
-    ]
-}
-```
-Servers assume that a client/user is online as long as they have an open websocket with the homeServer.
-
-### Sent by server
-#### Client update
-A server will know when a client disconnects as the socket connection will drop off. 
-
-When one of the following things happens, a server should send a `client_update` message to all other servers in the neighbourhood so that they can update their internal state.
-1. A client sends `hello`
-2. A client disconnects
-
-You don't need to send an update for clients who disconnected before sending `hello`.
-
-The `client_update` advertises all currently connected users on a particular server.
-```JSON
-{
-    "type": "client_update",
-    "clients": [
-        {
-          "client-id":"<client-id>",
-          "public-key":"<PEM of exported RSA public key of client>",
-        },
-    ]
-}
-```
-
-
-#### Client update request
-When a server comes online, it will have no initial knowledge of clients connected elsewhere, so it needs to request a `client_update` from all other servers in the neighbourhood.
-
-```JSON
-{
-    "type": "client_update_request"
-}
-```
-All other servers respond by sending `client_update`
-
-#### Server Hello
-When a server establishes a connection with another server in the neighbourhood, it sends this message. It doesn't send a public key, as this should be shared prior when agreeing on a neighbourhood, and can be used to verify the identity of the server.
-```JSON
-{
-   "data": {
-        "type": "server_hello",
-        "sender": "<server IP connecting>"
-   }
-}
-```
-
-### Definition Tables of Types and Sections and additional explanations
-
-#### tables
-| Type | Type Meaning |
-|:----:|:------------:| 
-| signed_data| data that has a signature confirming the sender|
-| client_list_request | request sent by client, to get the list of clients online connected to a server |
-| client_update | update send by server letting clients know who has disconnected |
-| client_list | reply by server to client_List_request which contains list of users online |
-| client_update_request | server asking other servers for the client_update |
-
-|different types in the data section | meaning |
-| :-----: | :----: |
-| chat | message that has chat message data in it |
-| hello | message sent when client connects to a server |
-| public_chat | message sent to every one connected in the neighbourhood and homeServer not encrypted |
-| server_hello | message sent between server-to-server connections |
-
-#### Counter
-Every message sent by user, tied to their unique key set, has the counter attached to it. The recipient stores the counter value from the latest message sent to them by each user, then when ever a new message received, the counter value stored is compared to the value in the message. If the new value is larger than the old one, the message has not been resent. The starting value of the count will be 0.
-
-The intention behiend the additon of the counter is as a way to defend against replay attacks. A replay attack is a when a copy is taken of a message you receive, and is then resent to you later. For example, Alice sents Bob a message saying "meet me at the park at 2pm" and a malicious attacker takes a copy of that message. A few weeks later the malicious attacker resends Bob the message. Bob goes to the park and finds the malicious attacker there instead of Alice.
-
-## File transfers
-File transfers are performed over an HTTP[S] API.
-
-### Upload file
-Uplaod a file in the same format as an HTTP form.
-```
-"<server>/api/upload" {
-    METHOD: POST
-    body: file
-}
-```
-The server makes no guarantees that it will accept your file or retain it for any given length of time. It can also reject the file based on an arbitrary file size limit. An appropriate `413` error can be returned for this case.
-
-A successful file upload will result in the following response:
-```
-response {
-    body: {
-        file_url: "<...>"
-    }
-}
-```
-`file_url` is a unique URL that points to the uploaded file which can be retrieved later.
-
-### Retrieve file
-```
-"<file_url>" {
-    METHOD: GET
-}
-```
-The server will respond with the file data. File uploads and downloads are not authenticated and secured only by keeping the unique URL secret.
-
-
-## Client Responsibilities
-When receiving a message from the server, the client first needs to validate the signature against the public key of the sender.
-
-### How to send a message?
-There are two things to know about your recipient: their server address and public key. use these to fill out a `"chat"` message and your server will forward it to the correct destination.
-
-### How do you know when you receive a message for you?
-When receiving a chat message, you should attempt to decrypt the `symm_key` field, then use that to decrypt the `chat` field. If the result follows the format, then the message is directed to you. You can also check for your public key in the `participants` list.
-
-
-## Server Responsibilities
-A server is primarily a relay for messages. It does only a minimal amount of message parsing and state storage.
-
-It is a server's responsibility to not forward garbage, so it should check all messages to ensure they follow a standard message format as above. This includes incoming (from other servers) and outgoing (from clients) messages.
-
-A server is located by an address which opionally includes a port. The default port is the same as http[s]. 80 for non-TLS and 443 for TLS
-- 10.0.0.27:8001
-- my.awesomeserver.net
-- localhost:666
-
-### Stored state
-- Client list. A server should listen to every `client_update` message and use this to keep an internal list of all connected clients in the neighbourhood.
-- Files
-- List of other servers in the neighbourhood
-
-### Adding a new server to a neighbourhood
-The server admins (Whoever is hosting the server) need to agree and each manually add the new server into the stored list.
-If not all servers agree on who is in the neighbourhood, the neighbourhood enters an invalid state and it is not guaranteed that all clients will be able to communicate.
-
-
-## Underlying technologies
-The transport layer uses Websockets, meaning the server will need to be HTTP-capable. There are various websocket libraries for the popular programming languages that will handle this.
-
-## Encryption
-### Asymmetric Encryption
-Asymmetric encryption and decryption is performed with RSA.
-- Key size/Modulus length (n) = 2048 bits
-- Public exponent (e) = 65537
-- Padding scheme: OAEP with SHA-256 digest/hash function
-- Public keys are exported in PEM encoding with SPKI format.
-
-Signing and verification also uses RSA. It shares the same keys as encryption/decryption.
-- Padding scheme: PSS with SHA-256 digest/hash function
-- Salt length: 32 bytes
-
-Symmetric encryption is performed with AES in GCM mode.
-- Initialisation vector (IV) = 16 bytes (Must be randomly generated)
-- Additional/associated data = not used (empty).
-- Key length: 16 bytes (128 bits)
-- Authentication tag: 16 bytes (128 bits). The authentication tag takes up the final 128 bits of the ciphertext.
-
-### Order to apply different layers of encrpytion  
-- message is created
-- create a signature by applying the signature scheme RSA-PSS 
-- encrpyt the message using the symmetric encyption specified above
-- encrypt the symmetric key used to encrypt the message with the public asymmetric encrption key of the intended recipient
-- format these to be sent as shown in proctocol defined messages
-
-
-### Recommended Libraries
-
- - [OpenSSL]()
- - [JSON](https://github.com/nlohmann/json)
- - [Websocket++](https://github.com/zaphoyd/websocketpp)
-
-
+To shorten the already long appendix, here is [a link]() to the feedback stored in our GitHub repo.
 
 # Biblography
 
-https://www.cyber.gov.au/sites/default/files/2024-06/joint-guidance-exploring-memory-safety-in-critical-open-source-projects-508c.pdf
-
-# Todo
-Phase 4: Reflection and Feedback (Week 11)
-
-Objective: Reflect on the development process and learn from the feedback received.
-
-Approach:
-
-Write a reflective commentary discussing your protocol's standards, implementation challenges, thoughts on the integrated backdoors, and anticipated difficulty detecting them.  As guidance, do not write more than 2000 words (~4 pages single-spaced A4).  Your code, proof of concept, and screenshots can go to a set of appendices, which do not count into those 2000 words/4 pages. 
-
-The reflective commentary should contain the following information:
-
-- [x] Your reflection on the standardised protocol.  Even if you had to comply with the agreed implementation (in order to achieve interoperability), you might have had a different view.  Here is the space to comment and give your thoughts on what worked and what didn't work. 
-- [x] Describe and submit your backdoor free version of the code.  Explain design choices in the implementation.  Demonstrate how your code runs (by chatting with your own implementation or by chatting with other implementations).  Discuss lessons learned.  This can also include any bugs reported by other groups. 
-Explain what backdoors/vulnerabilities you added.  What your thoughts and objectives were.  Explain and demonstrate how to exploit your backdoor. 
-- [x] Evaluate the feedback you received from other groups.  Did they find your backdoors?  Did they find other problems in your code?  Was the report useful feedback?  
-- [ ] For what groups did you provide feedback (name the group and group members).  What feedback did you provide to other groups?  What challenges did you face?  How did you overcome or approach those challenges (e.g., did you talk to the other groups)? 
-
-Reflective Commentary - Self critique and biases/consequences
-Reflective Commentary - Clarity
-Reflective Commentary - Ability to question and self critique and cyber security skill shortage
-Reflective Commentary - Use of AI
-Feedback Given.
+CISA et al., 2024, 'Exploring Memory Safety in Critical Open Source Projects', viewed 15th October 2024, < https://www.cyber.gov.au/sites/default/files/2024-06/joint-guidance-exploring-memory-safety-in-critical-open-source-projects-508c.pdf >
